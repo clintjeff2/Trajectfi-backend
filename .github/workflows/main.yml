@@ -1,0 +1,65 @@
+name: Trajecfi WorkFlow
+
+on: [push]
+
+jobs:
+  test:
+    name: account-service-tests
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:14
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Poetry
+        run: |
+          pip install -U poetry
+          poetry --version
+
+      - name: Install Dependencies
+        run: poetry install
+       
+      - name: Set environment variables
+        run: |
+          cp .env.example .env
+      
+      - name: Run migrations check to ensure that there are no migrations left to create
+        env:
+          DATABASE_URL: 'postgres://postgres:postgres@localhost:${{ job.services.postgres.ports[5432] }}/test?sslmode=disable'
+        run: | 
+          poetry run python manage.py makemigrations --check --dry-run
+
+      - name: Run format check
+        run: |
+          poetry run black --check .
+      
+      - name: Run lint check
+        run: |
+          poetry run flake8 .
+
+      - name: Run tests
+        env:
+          DATABASE_URL: 'postgres://postgres:postgres@localhost:${{ job.services.postgres.ports[5432] }}/test?sslmode=disable'
+        run: |
+          poetry run python manage.py migrate --noinput
+          poetry run python manage.py test

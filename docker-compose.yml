@@ -33,3 +33,7 @@ services:
 
 volumes:
   trajectfi-db-data:
+
+networks:
+  default:
+    name: trajectfi

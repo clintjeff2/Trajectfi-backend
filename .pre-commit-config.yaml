@@ -1,11 +1,7 @@
 repos:
 -   repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v2.3.0
+    rev: v5.0.0
     hooks:
-    - id: flake8
-      types: ['file']
-      files: \.(py|pyx|pxd)$
-      args: ["--max-line-length=88"]
     - id: detect-private-key
 -   repo: https://github.com/CoinAlpha/git-hooks
     rev: 78f0683233a09c68a072fd52740d32c0376d4f0f
@@ -25,3 +21,11 @@ repos:
     -   id: black
         files: "\\.(py)$"
         args: [--check]
+-   repo: https://github.com/pycqa/flake8
+    rev: 6.0.0
+    hooks:
+    -   id: flake8
+        exclude: (^|/)migrations/
+        types: ['file']
+        files: \.(py|pyx|pxd)$
+        args: ["--max-line-length=88"]

@@ -10,7 +10,7 @@ on:
 
 jobs:
   test:
-    name: account-service-tests
+    name: trajectfi-tests
     runs-on: ubuntu-latest
 
     services:

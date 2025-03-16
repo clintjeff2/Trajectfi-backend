@@ -61,7 +61,7 @@ jobs:
       
       - name: Run lint check
         run: |
-          poetry run flake8 .
+          poetry run ruff check .
 
       - name: Run tests
         env:

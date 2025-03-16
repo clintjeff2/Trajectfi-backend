@@ -1,4 +1,4 @@
-service = trajecfi
+service = trajectfi
 
 # to format the codebase
 format:

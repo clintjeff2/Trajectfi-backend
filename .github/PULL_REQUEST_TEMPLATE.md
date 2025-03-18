@@ -1,5 +1,3 @@
-# Pull Request Template for Trajectfi Backend
-
 ## Description
 <!-- Provide a clear and concise description of your changes -->
 

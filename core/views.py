@@ -7,3 +7,8 @@ from . import models, serializers
 class AcceptedNFTListAPIView(ListAPIView):
     queryset = models.AcceptedNFT.objects.all().order_by("name")
     serializer_class = serializers.AcceptedNFTSerializer
+
+
+class AcceptedTokenListAPIView(ListAPIView):
+    queryset = models.AcceptedToken.objects.all().order_by("name")
+    serializer_class = serializers.AcceptedTokenSerializer

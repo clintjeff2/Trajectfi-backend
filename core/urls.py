@@ -1,4 +1,4 @@
-from django.urls import path  # noqa
+from django.urls import path
 
 from . import views
 
@@ -7,5 +7,10 @@ urlpatterns = [
         "accepted-nfts/",
         views.AcceptedNFTListAPIView.as_view(),
         name="accepted-nfts-list-view",
-    )
+    ),
+    path(
+        "accepted-tokens/",
+        views.AcceptedTokenListAPIView.as_view(),
+        name="accepted-tokens-list-view",
+    ),
 ]

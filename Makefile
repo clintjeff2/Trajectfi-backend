@@ -31,6 +31,10 @@ migrations:
 migrate:
 	poetry run python manage.py migrate
 
+#  run test
+test:
+	poetry run python manage.py test
+
 # start database
 database-up:
 	docker compose up trajectfi_db -d
@@ -59,6 +63,10 @@ docker-migrations:
 # migrate to db with docker
 docker-migrate:
 	docker compose run --rm ${service} python manage.py migrate
+
+# run tests with docker
+docker-test:
+	docker compose run --rm ${service} python manage.py test
 
 # to format the codebase with docker
 docker-format:

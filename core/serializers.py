@@ -75,7 +75,7 @@ class SignInSerializer(serializers.Serializer):
         public_key: The public key of the signer
     """
 
-    signatures = serializers.ListSerializer(child=serializers.CharField)
+    signatures = serializers.ListField(child=serializers.CharField())
     public_key = serializers.CharField()
 
     def validate(self, attrs: dict) -> dict:

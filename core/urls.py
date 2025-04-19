@@ -13,4 +13,9 @@ urlpatterns = [
         views.AcceptedTokenListAPIView.as_view(),
         name="accepted-tokens-list-view",
     ),
+    path(
+        "sigin/",
+        views.SignInAPIView.as_view(),
+        name="signin",
+    ),
 ]

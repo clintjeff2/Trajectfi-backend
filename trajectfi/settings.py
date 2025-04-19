@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 import os
+from datetime import timedelta
 from pathlib import Path
 
 import dj_database_url
@@ -158,6 +159,20 @@ REST_FRAMEWORK = {
     "TIME_INPUT_FORMATS": ["iso-8601", "%H:%M:%S", "%H:%M"],
     "TIME_FORMAT": "%H:%M:%S",
 }
+
+# JWT  settings
+SIMPLE_JWT = {
+    "AUTH_HEADER_TYPES": ("Bearer",),
+    "USER_ID_CLAIM": "user_id",
+    "ACCESS_TOKEN_LIFETIME": timedelta(days=3),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=30),
+}
+
+# settings for generating signature request format
+SIG_DOMAIN_NAME = "TRAJECTFI"
+SIG_CHAIN_ID = "SN_SEPOLIA"
+SIG_VERSION = "0.1.0"
+
 
 # Custom settings
 AUTH_USER_MODEL = "core.User"

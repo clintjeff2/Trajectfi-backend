@@ -53,16 +53,41 @@ class AcceptedTokenSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
+    """
+    Convert the user model class to dict-like data for json serialization.
+    """
+
     class Meta:
         model = models.User
         fields = ["id", "public_key", "email"]
 
 
-class LoginSerializer(serializers.Serializer):
+class SignInSerializer(serializers.Serializer):
+    """
+    Serializer class for the sign in request call.
+    It validates the signstures to ensure it is the right user that is
+    making the signin request.
+    This is for signing in with the wallet (account).
+
+    Data:
+        signatures: A list of strings representing the signatures of
+            the signed login message
+        public_key: The public key of the signer
+    """
+
     signatures = serializers.ListSerializer(child=serializers.CharField)
     public_key = serializers.CharField()
 
-    def validate(self, attrs):
+    def validate(self, attrs: dict) -> dict:
+        """
+        Validate the request data
+        """
+        # The signature list length must be greater than or equals to 5
+        # according to the starknet signature format.
+        if len(attrs["signatures"]) < 5:
+            raise exceptions.InvalidSignature
+
+        # validate the signature
         check = CoreService.validate_login_request(
             attrs["signatures"], attrs["public_key"]
         )
@@ -77,7 +102,14 @@ class LoginSerializer(serializers.Serializer):
 
         return attrs
 
-    def save(self):
+    def save(self) -> dict:
+        """
+        Create or get the user and generate an auth token data
+        for requests authentications
+
+        Returns:
+            dict: Data of the user
+        """
         public_key = self.validated_data["public_key"]
         user, is_new = CoreService.login_or_register_user(public_key)
         data = UserSerializer(user).data

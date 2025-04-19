@@ -18,7 +18,7 @@ class AcceptedTokenListAPIView(ListAPIView):
 class SignInAPIView(GenericAPIView):
     serializer_class = serializers.SignInSerializer
 
-    def get(self, request):
+    def post(self, request):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         data = serializer.save()

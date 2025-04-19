@@ -1,7 +1,7 @@
 from rest_framework import exceptions as rest_exceptions, serializers
-from service import CoreService
 
 from . import exceptions, models
+from .service import CoreService
 
 
 class AcceptedNFTSerializer(serializers.ModelSerializer):

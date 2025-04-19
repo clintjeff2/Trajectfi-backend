@@ -1,4 +1,5 @@
-from rest_framework import exceptions as rest_exceptions, serializers
+from rest_framework import exceptions as rest_exceptions
+from rest_framework import serializers
 
 from . import exceptions, models
 from .service import CoreService

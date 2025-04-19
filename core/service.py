@@ -1,8 +1,9 @@
 from rest_framework_simplejwt.tokens import RefreshToken
 from starknet_py.utils.typed_data import TypedData
-from utils import SignatureUtils
 
 from core import models
+
+from .utils import SignatureUtils
 
 
 class CoreService:

@@ -1,3 +1,4 @@
+from django.conf import settings
 from rest_framework import exceptions as rest_exceptions
 from rest_framework import serializers
 
@@ -117,3 +118,104 @@ class SignInSerializer(serializers.Serializer):
         data["is_new"] = is_new
         token_info = CoreService.generate_auth_token_data(user)
         return {**data, **token_info}
+
+
+class OfferSerializer(serializers.Serializer):
+    class Meta:
+        model = models.Offer
+        fields = "__all__"
+
+
+class SimpleOfferSerializer(serializers.Serializer):
+    class Meta:
+        model = models.Offer
+        exclude = [
+            "signature",
+            "signature_expiry",
+            "signature_chain_id",
+            "signature_unique_id",
+        ]
+
+
+class MakeOfferSerializer(serializers.Serializer):
+    listing = serializers.UUIDField()
+    principal = serializers.IntegerField(min_value=1)
+    repayment_amount = serializers.IntegerField(min_value=1)
+    collateral_contract = serializers.CharField()
+    collateral_id = serializers.IntegerField(min_value=1)
+    token_contract = serializers.CharField()
+    loan_duration = serializers.IntegerField(
+        min_value=settings.MIN_LOAN_DURATION, max_value=settings.MAX_LOAN_DURATION
+    )
+    expiry = serializers.IntegerField()
+    chain_id = serializers.CharField()
+    unique_id = serializers.IntegerField()
+    signatures = serializers.ListField(child=serializers.CharField())
+
+    def validate(self, attrs):
+        """
+        Validate the request data
+        """
+        # Listing Validation
+        try:
+            listing = models.Listing.objects.get(id=attrs["listing"])
+        except models.Listing.DoesNotExist:
+            raise serializers.ValidationError({"detail": "Listing does not exist"})
+        if listing.status != models.ListingStatus.OPEN:
+            raise serializers.ValidationError({"detail": "Listing is not active"})
+        # Collateral Contract Validation
+        if listing.nft_contract_address != attrs["collateral_contract"]:
+            raise serializers.ValidationError({"detail": "Invalid listing collateral"})
+
+        # Principal and Repayment Validation
+        if attrs["principal"] > attrs["repayment_amount"]:
+            raise serializers.ValidationError(
+                {"detail": "Principal should be less tha Repayment amount"}
+            )
+
+        # validate offer token
+        if not models.AcceptedToken.objects.filter(
+            contract_address=attrs["token_contract"]
+        ).exists():
+            raise serializers.ValidationError({"detail": "Token not supported"})
+
+        # verify the signature
+        data = {
+            "principal": attrs["prinicipal"],
+            "repayment_amount": attrs["repayment_amount"],
+            "collateral_contract": attrs["collateral_contract"],
+            "collateral_id": attrs["collateral_id"],
+            "token_contract": attrs["token_contract"],
+            "loan_duration": attrs["loan_duration"],
+            "expiry": attrs["expiry"],
+            "chain_id": attrs["chain_id"],
+            "unique_id": attrs["unique_id"],
+        }
+        user = self.context["user"]
+
+        check = CoreService.validate_loan_offer_request(data, attrs["signatures"], user)
+        if not check:
+            raise serializers.ValidationError({"detail": "Invalid signature message"})
+
+        # set the necessary contexts
+        self.context["listing"] = listing
+
+        return attrs
+
+    def save(self, **kwargs):
+        user = self.context["user"]
+        listing = self.context["listing"]
+        offer = CoreService.create_offer(
+            user,
+            listing,
+            self.validated_data["principal"],
+            self.validated_data["repayment_amount"],
+            self.validated_data["duration"],
+            self.validated_data["signature"],
+            self.validated_data["expiry"],
+            self.validated_data["chain_id"],
+            self.validated_data["unique_id"],
+        )
+        data = OfferSerializer(offer).data
+
+        return data

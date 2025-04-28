@@ -44,6 +44,46 @@ class SignatureUtils:
         return data.copy()
 
     @classmethod
+    def offer_typed_data_format(cls) -> dict:
+        """
+        This represents the signature request of the offer operation.
+
+        Returns:
+            dict: The signature request structure of the offer functionality.
+        """
+        data = {
+            "domain": Domain(
+                **{
+                    "name": DOMAIN_NAME,
+                    "chain_id": CHAIN_ID,
+                    "version": VERSION,
+                }
+            ),
+            "types": {
+                "StarknetDomain": [
+                    Parameter(**{"name": "name", "type": "felt"}),
+                    Parameter(**{"name": "chainId", "type": "felt"}),
+                    Parameter(**{"name": "version", "type": "felt"}),
+                ],
+                "Message": [
+                    Parameter(**{"name": "principal", "type": "felt"}),
+                    Parameter(**{"name": "repayment_amount", "type": "felt"}),
+                    Parameter(**{"name": "collateral_contract", "type": "felt"}),
+                    Parameter(**{"name": "collateral_id", "type": "felt"}),
+                    Parameter(**{"name": "token_contract", "type": "felt"}),
+                    Parameter(**{"name": "loan_duration", "type": "felt"}),
+                    Parameter(**{"name": "lender", "type": "felt"}),
+                    Parameter(**{"name": "expiry", "type": "felt"}),
+                    Parameter(**{"name": "chain_id", "type": "felt"}),
+                    Parameter(**{"name": "unique_id", "type": "felt"}),
+                ],
+            },
+            "primary_type": "Message",
+            "message": {},
+        }
+        return data.copy()
+
+    @classmethod
     def generate_signature_typed_data(cls, data: dict, type_format: dict) -> TypedData:
         """
         Integrates the data from a signing format into a signature request.

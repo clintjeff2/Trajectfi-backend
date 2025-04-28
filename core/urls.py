@@ -18,4 +18,5 @@ urlpatterns = [
         views.SignInAPIView.as_view(),
         name="signin",
     ),
+    path("offer/create/", views.OfferCreateAPIView.as_view(), name="create-offer"),
 ]

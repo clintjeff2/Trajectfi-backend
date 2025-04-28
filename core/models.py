@@ -20,6 +20,11 @@ class LoanRenegotiationStatus(models.IntegerChoices):
     ACCEPTED = 3, "Accepted"
 
 
+class ListingStatus(models.IntegerChoices):
+    OPEN = 1, "OPEN"
+    CLOSED = 2, "CLOSED"
+
+
 # MANAGERS
 
 
@@ -218,6 +223,9 @@ class Listing(BaseModel):
         _("Repayment Amount"), null=True, blank=True
     )
     duration = models.PositiveIntegerField(_("Loan Duration"), null=True, blank=True)
+    status = models.IntegerField(
+        choices=ListingStatus.choices, default=ListingStatus.OPEN
+    )
 
     def __str__(self) -> str:
         return f"Token: {self.token_contract_address}, NFT: {self.nft_contract_address}"

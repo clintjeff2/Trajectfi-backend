@@ -1,3 +1,5 @@
+import json
+
 from rest_framework_simplejwt.tokens import RefreshToken
 from starknet_py.utils.typed_data import TypedData
 
@@ -24,13 +26,31 @@ class CoreService:
         return token_data
 
     @classmethod
+    def validate_loan_offer_request(
+        cls, data: dict, signatures: list[str], user: models.User
+    ):
+        """
+        Validate the signed data that verifies the offer create functionality.
+        The data is signed by the user's wallet and it's components
+        are sent for verification
+        Args:
+            data(dict): the data required to complete the signature request
+            signatures(list[str]): the signatures of the message
+            user: The user that is signing the message,
+
+        """
+        request_format = SignatureUtils.offer_typed_data_format()
+        typed_data = SignatureUtils.generate_signature_typed_data(data, request_format)
+        return SignatureUtils.verify_signatures(typed_data, signatures, user.public_key)
+
+    @classmethod
     def validate_login_request(
         cls, signatures: list[str], public_key: list[str]
     ) -> bool:
         """
         Validate the Signed data that verifies the login of the user.
         The data is signed by the user's wallet and it's components
-        are sent for verifiction
+        are sent for verification
         Args:
             signatures(list[str]): the signatures of the message
             public_key: The public key of the signer.
@@ -55,3 +75,36 @@ class CoreService:
         """
         user, created = models.User.objects.get_or_create(public_key=public_key)
         return user, created
+
+    @classmethod
+    def create_offer(
+        cls,
+        user: models.User,
+        listing: models.Listing,
+        principal: int,
+        repayment_amount: int,
+        duration: int,
+        signature: list[str],
+        signature_expiry: int,
+        signature_chain_id: int,
+        signature_unique_id: int,
+    ) -> models.Offer:
+        """
+        Create an Offer with all the required data.
+        convert the signature to string json and save it as string in the db
+        Returns:
+            models.Offer: the newly created offer instance
+        """
+        offer = models.Offer()
+        offer.user = user
+        offer.listing = listing
+        offer.borrow_amount = principal
+        offer.repayment_amount = repayment_amount
+        offer.duration = duration
+        # convert signature to json string and save as string to db
+        offer.signature = json.dumps(signature)
+        offer.signature_expiry = signature_expiry
+        offer.signature_chain_id = signature_chain_id
+        offer.signature_unique_id = signature_unique_id
+        offer.save()
+        return offer

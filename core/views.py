@@ -1,5 +1,7 @@
 # Create your views here.
+from rest_framework import status
 from rest_framework.generics import GenericAPIView, ListAPIView
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from . import models, serializers
@@ -24,3 +26,15 @@ class SignInAPIView(GenericAPIView):
         data = serializer.save()
 
         return Response(data)
+
+
+class OfferCreateAPIView(GenericAPIView):
+    serializer_class = serializers.MakeOfferSerializer
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        user = request.user
+        serializer = self.serializer_class(data=request.data, context={"user": user})
+        serializer.is_valid(raise_exception=True)
+        data = serializer.save()
+        return Response(data, status=status.HTTP_201_CREATED)

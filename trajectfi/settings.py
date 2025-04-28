@@ -173,6 +173,10 @@ SIG_DOMAIN_NAME = "TRAJECTFI"
 SIG_CHAIN_ID = "SN_SEPOLIA"
 SIG_VERSION = "0.1.0"
 
+# loan settings
+MAX_LOAN_DURATION = timedelta(days=365).seconds
+MIN_LOAN_DURATION = timedelta(days=1).seconds
+
 
 # Custom settings
 AUTH_USER_MODEL = "core.User"

@@ -108,3 +108,12 @@ class CoreService:
         offer.signature_unique_id = signature_unique_id
         offer.save()
         return offer
+
+    @classmethod
+    def cancel_offer(cls, offer_id: str):
+        """
+        Delete the offer
+        Args:
+            offer_id(str): The id of the offer
+        """
+        models.Offer.objects.get(id=offer_id).delete()

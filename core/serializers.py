@@ -1,6 +1,6 @@
 from django.conf import settings
 from rest_framework import exceptions as rest_exceptions
-from rest_framework import serializers
+from rest_framework import generics, serializers
 
 from . import exceptions, models
 from .service import CoreService
@@ -219,3 +219,18 @@ class MakeOfferSerializer(serializers.Serializer):
         data = OfferSerializer(offer).data
 
         return data
+
+
+class CancelOfferSerializer(serializers.Serializer):
+    offer = serializers.UUIDField
+
+    def validate(self, attrs):
+        user = self.context["user"]
+        # check if the offer exist and it belongs
+        # to the user requesting the action
+        generics.get_object_or_404(models.Offer, id=attrs["offer"], user=user)
+        return attrs
+
+    def save(self):
+        # delete the offer
+        CoreService.cancel_offer(self.validated_data["offer_id"])

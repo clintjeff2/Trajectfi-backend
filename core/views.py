@@ -38,3 +38,15 @@ class OfferCreateAPIView(GenericAPIView):
         serializer.is_valid(raise_exception=True)
         data = serializer.save()
         return Response(data, status=status.HTTP_201_CREATED)
+
+
+class OfferCancelAPIView(GenericAPIView):
+    serializer_class = serializers.CancelOfferSerializer
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        user = request.user
+        serializer = self.serializer_class(data=request.data, context={"user": user})
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(status=status.HTTP_204_NO_CONTENT)

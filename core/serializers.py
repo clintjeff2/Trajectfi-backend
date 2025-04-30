@@ -3,6 +3,7 @@ from rest_framework import exceptions as rest_exceptions
 from rest_framework import generics, serializers
 
 from . import exceptions, models
+from .models import Listing
 from .service import CoreService
 
 
@@ -234,3 +235,27 @@ class CancelOfferSerializer(serializers.Serializer):
     def save(self):
         # delete the offer
         CoreService.cancel_offer(self.validated_data["offer_id"])
+
+
+class ListingSerializer(serializers.ModelSerializer):
+    listing_id = serializers.UUIDField(source="id", read_only=True)
+    collateral_contract = serializers.CharField(
+        source="nft_contract_address", read_only=True
+    )
+    collateral_id = serializers.IntegerField(source="nft_token_id", read_only=True)
+    borrower_address = serializers.CharField(source="user.public_key", read_only=True)
+    loan_amount = serializers.IntegerField(source="borrow_amount", read_only=True)
+    loan_duration = serializers.IntegerField(source="duration", read_only=True)
+
+    class Meta:
+        model = Listing
+        fields = [
+            "listing_id",
+            "collateral_contract",
+            "collateral_id",
+            "borrower_address",
+            "loan_amount",
+            "loan_duration",
+            "created_at",
+            "status",
+        ]

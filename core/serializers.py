@@ -171,7 +171,7 @@ class MakeOfferSerializer(serializers.Serializer):
         # Principal and Repayment Validation
         if attrs["principal"] > attrs["repayment_amount"]:
             raise serializers.ValidationError(
-                {"detail": "Principal should be less tha Repayment amount"}
+                {"detail": "Principal should be less than Repayment amount"}
             )
 
         # validate offer token
@@ -238,24 +238,15 @@ class CancelOfferSerializer(serializers.Serializer):
 
 
 class ListingSerializer(serializers.ModelSerializer):
-    listing_id = serializers.UUIDField(source="id", read_only=True)
-    collateral_contract = serializers.CharField(
-        source="nft_contract_address", read_only=True
-    )
-    collateral_id = serializers.IntegerField(source="nft_token_id", read_only=True)
-    borrower_address = serializers.CharField(source="user.public_key", read_only=True)
-    loan_amount = serializers.IntegerField(source="borrow_amount", read_only=True)
-    loan_duration = serializers.IntegerField(source="duration", read_only=True)
-
     class Meta:
         model = Listing
         fields = [
-            "listing_id",
-            "collateral_contract",
-            "collateral_id",
-            "borrower_address",
-            "loan_amount",
-            "loan_duration",
+            "id",
+            "nft_contract_address",
+            "nft_token_id",
+            "user",
+            "borrow_amount",
+            "duration",
             "created_at",
             "status",
         ]

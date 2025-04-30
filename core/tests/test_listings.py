@@ -12,7 +12,6 @@ def test_list_active_listings():
     url = reverse("listing-list")
 
     user = factories.UserFactory()
-
     active_listing = factories.ListingFactory(user=user, status=ListingStatus.OPEN)
     factories.ListingFactory(user=user, status=ListingStatus.CLOSED)
 
@@ -24,12 +23,12 @@ def test_list_active_listings():
     assert len(results) == 1
 
     listing = results[0]
-    assert listing["listing_id"] == str(active_listing.id)
-    assert listing["collateral_contract"] == active_listing.nft_contract_address
-    assert listing["collateral_id"] == active_listing.nft_token_id
-    assert listing["borrower_address"] == active_listing.user.public_key
-    assert listing["loan_amount"] == active_listing.borrow_amount
-    assert listing["loan_duration"] == active_listing.duration
+    assert listing["id"] == str(active_listing.id)
+    assert listing["nft_contract_address"] == active_listing.nft_contract_address
+    assert listing["nft_token_id"] == active_listing.nft_token_id
+    assert listing["user"] == str(active_listing.user.id)
+    assert listing["borrow_amount"] == active_listing.borrow_amount
+    assert listing["duration"] == active_listing.duration
     assert listing["status"] == active_listing.status
 
 
@@ -49,7 +48,7 @@ def test_listings_filter_by_collateral_contract():
     data = response.json()
     results = data["results"]
     assert len(results) == 1
-    assert results[0]["collateral_contract"] == "0xFilterThis"
+    assert results[0]["nft_contract_address"] == "0xFilterThis"
 
 
 @pytest.mark.django_db
@@ -58,7 +57,6 @@ def test_listings_filter_by_borrower_address():
     url = reverse("listing-list")
 
     user = factories.UserFactory(public_key="0xBorrowerFilter")
-    factories.ListingFactory(user=user, status=ListingStatus.OPEN)
 
     response = client.get(url, {"borrower_address": "0xBorrowerFilter"})
     assert response.status_code == 200
@@ -66,7 +64,7 @@ def test_listings_filter_by_borrower_address():
     data = response.json()
     results = data["results"]
     assert len(results) == 1
-    assert results[0]["borrower_address"] == "0xBorrowerFilter"
+    assert results[0]["user"] == str(user.id)
 
 
 @pytest.mark.django_db
@@ -82,7 +80,6 @@ def test_listings_pagination_structure():
     assert response.status_code == 200
 
     data = response.json()
-
     assert "results" in data
     assert isinstance(data["results"], list)
     assert "count" in data

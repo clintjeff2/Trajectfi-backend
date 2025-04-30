@@ -67,3 +67,24 @@ def test_listings_filter_by_borrower_address():
     results = data["results"]
     assert len(results) == 1
     assert results[0]["borrower_address"] == "0xBorrowerFilter"
+
+
+@pytest.mark.django_db
+def test_listings_pagination_structure():
+    client = APIClient()
+    url = reverse("listing-list")
+
+    user = factories.UserFactory()
+    for _ in range(5):
+        factories.ListingFactory(user=user, status=ListingStatus.OPEN)
+
+    response = client.get(url)
+    assert response.status_code == 200
+
+    data = response.json()
+
+    assert "results" in data
+    assert isinstance(data["results"], list)
+    assert "count" in data
+    assert "next" in data
+    assert "previous" in data

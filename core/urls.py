@@ -18,6 +18,11 @@ urlpatterns = [
         views.SignInAPIView.as_view(),
         name="signin",
     ),
+    path(
+        "listings/",
+        views.ListingListAPIView.as_view(),
+        name="listing-list",
+    ),
     path("offer/create/", views.OfferCreateAPIView.as_view(), name="create-offer"),
     path("offer/cancel/", views.OfferCancelAPIView.as_view(), name="cancel-offer"),
 ]

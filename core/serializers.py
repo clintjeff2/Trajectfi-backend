@@ -3,6 +3,7 @@ from rest_framework import exceptions as rest_exceptions
 from rest_framework import generics, serializers
 
 from . import exceptions, models
+from .models import Listing
 from .service import CoreService
 
 
@@ -170,7 +171,7 @@ class MakeOfferSerializer(serializers.Serializer):
         # Principal and Repayment Validation
         if attrs["principal"] > attrs["repayment_amount"]:
             raise serializers.ValidationError(
-                {"detail": "Principal should be less tha Repayment amount"}
+                {"detail": "Principal should be less than Repayment amount"}
             )
 
         # validate offer token
@@ -234,3 +235,18 @@ class CancelOfferSerializer(serializers.Serializer):
     def save(self):
         # delete the offer
         CoreService.cancel_offer(self.validated_data["offer_id"])
+
+
+class ListingSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Listing
+        fields = [
+            "id",
+            "nft_contract_address",
+            "nft_token_id",
+            "user",
+            "borrow_amount",
+            "duration",
+            "created_at",
+            "status",
+        ]

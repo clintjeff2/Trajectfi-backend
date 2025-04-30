@@ -1,10 +1,13 @@
 # Create your views here.
-from rest_framework import status
+from rest_framework import filters, status
 from rest_framework.generics import GenericAPIView, ListAPIView
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from . import models, serializers
+from .models import Listing, ListingStatus
+from .serializers import ListingSerializer
 
 
 class AcceptedNFTListAPIView(ListAPIView):
@@ -50,3 +53,30 @@ class OfferCancelAPIView(GenericAPIView):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class ListingPagination(PageNumberPagination):
+    page_size = 10
+    page_size_query_param = "page_size"
+    max_page_size = 100
+
+
+class ListingListAPIView(ListAPIView):
+    serializer_class = ListingSerializer
+    pagination_class = ListingPagination
+    filter_backends = [filters.SearchFilter]
+    search_fields = ["nft_contract_address", "user__public_key"]
+
+    def get_queryset(self):
+        queryset = Listing.objects.filter(status=ListingStatus.OPEN).order_by(
+            "-created_at"
+        )
+        collateral_contract = self.request.query_params.get("collateral_contract")
+        borrower_address = self.request.query_params.get("borrower_address")
+
+        if collateral_contract:
+            queryset = queryset.filter(nft_contract_address__iexact=collateral_contract)
+        if borrower_address:
+            queryset = queryset.filter(user__public_key__iexact=borrower_address)
+
+        return queryset
